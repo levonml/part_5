@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import Error from "./components/Error";
+import Notification from "./components/Notification";
 
 const App = () => {
 	const [blogs, setBlogs] = useState([]);
@@ -11,6 +13,8 @@ const App = () => {
 	const [title, setTitle] = useState("");
 	const [author, setAuthor] = useState("");
 	const [url, setUrl] = useState("");
+	const [error, setError] = useState(null);
+	const [notification, setNotification] = useState(null);
 
 	useEffect(() => {
 		(async () => {
@@ -25,10 +29,11 @@ const App = () => {
 	const handleLogin = async (event) => {
 		event.preventDefault();
 		try {
-			const user = await loginService.login({ userName, password });
+			const user = await loginService.login({ userName, password }, setError);
+
 			setUsername("");
 			setPassword("");
-			setUser(user);
+			user && setUser(user);
 			user && window.localStorage.setItem("loggedUser", JSON.stringify(user));
 		} catch (err) {
 			console.log("login error", err);
@@ -48,8 +53,11 @@ const App = () => {
 		};
 		try {
 			const receivedBlog = await blogService.create(newBlog);
-			//setBlogs(blogs.concat(reseivedBlogs));
-			console.log("reseived New Blog is ", receivedBlog);
+			setBlogs(blogs.concat(receivedBlog));
+			setNotification(
+				`new blog ${receivedBlog.title} added by ${receivedBlog.author}`
+			);
+			setTimeout(() => setNotification(null), 3000);
 		} catch (err) {
 			console.log("error from getall", err);
 		}
@@ -63,7 +71,6 @@ const App = () => {
 			blogService.setToken(loggedUser.token);
 		}
 	}, []);
-	console.log("useeeeeeeeeeeeer iiis", user);
 	const blogsList = () => {
 		return (
 			<div>
@@ -139,10 +146,18 @@ const App = () => {
 		</form>
 	);
 	if (user === null) {
-		return <div>{loginForm()}</div>;
+		return (
+			<>
+				<Error message={error} />
+				<div>{loginForm()}</div>
+			</>
+		);
 	}
 	return (
 		<>
+			{" "}
+			{console.log("notivication from render", notification)}
+			<Notification message={notification} />
 			<div>{createNewBlog()}</div>
 			<div>{blogsList()}</div>
 		</>

@@ -11,7 +11,6 @@ const getAll = async () => {
 };
 let config = null;
 const setToken = (token) => {
-	console.log("token will beeee", token);
 	config = { headers: { Authorization: `Bearer ${token}` } };
 };
 const create = async (newBlog) => {
