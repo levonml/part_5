@@ -9,27 +9,52 @@ const App = () => {
 	const [userName, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 
-	const getBlogs = async () => {
-		const receivedBlogs = await blogService.getAll();
-		setBlogs(receivedBlogs);
-		console.log("blogs", blogs);
-	};
 	useEffect(() => {
-		getBlogs();
+		(async () => {
+			try {
+				console.log("inside the f");
+				const reseivedBlogs = await blogService.getAll();
+				setBlogs(reseivedBlogs);
+			} catch (err) {
+				console.log("error from getall", err);
+			}
+		})();
 	}, []);
-
 	const handleLogin = async (event) => {
 		event.preventDefault();
-		const loggedUser = await loginService.login({ userName, password });
-		console.log("loggeduser is", loggedUser);
-		setUsername("");
-		setPassword("");
-		loggedUser && setUser(loggedUser);
+		try {
+			const user = await loginService.login({ userName, password });
+			setUsername("");
+			setPassword("");
+			user && setUser(user);
+			user && window.localStorage.setItem("loggedUser", JSON.stringify(user));
+		} catch (err) {
+			console.log("login error", err);
+		}
 	};
+
+	const handleLogout = () => {
+		window.localStorage.clear();
+		console.log("in local storsge", window.localStorage.getItem("loggedUser"));
+	};
+	useEffect(() => {
+		let loggedUser = window.localStorage.getItem("loggedUser");
+		if (loggedUser) {
+			loggedUser = JSON.parse(loggedUser);
+			setUser(loggedUser);
+			console.log("logged ser isss", loggedUser);
+			//blogService.setToken(user.token);
+		}
+	}, []);
 	const blogsList = () => {
+		//getBlogs();
 		return (
 			<div>
-				<div>{user.username} logged-in</div>
+				<div>
+					{user.username} logged-in
+					<button onClick={handleLogout}>log out</button>
+				</div>
+
 				<div>
 					<h2>blogs</h2>
 					{blogs.map((blog) => (
