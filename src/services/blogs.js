@@ -21,5 +21,21 @@ const create = async (newBlog) => {
 		console.log("create error", err);
 	}
 };
-const blogService = { getAll, setToken, create };
+const update = async (obj) => {
+	const id = obj.id;
+	const newObj = {
+		title: obj.title,
+		author: obj.author,
+		url: obj.url,
+		likes: obj.likes,
+	};
+	console.log("obj", obj);
+	try {
+		const response = await axios.put(`${baseUrl}/${id}`, newObj);
+		return response.data;
+	} catch (err) {
+		console.log("error from getall", err);
+	}
+};
+const blogService = { getAll, setToken, create, update };
 export default blogService;
